@@ -62,10 +62,7 @@ class TextToSpeech:
         if not os.path.exists(model_path):
             raise FileNotFoundError(f"Model not found at {model_path}")        
         
-        output_file = self.get_safe_filename(text)
-        print('== Output file =>', output_file)
-        print('== Model path =>', model_path)
-        print('== Text =>', text)
+        output_file = self.get_safe_filename(text)        
         self.generate_speech(text, model_path, output_file, rate)
         
         return output_file

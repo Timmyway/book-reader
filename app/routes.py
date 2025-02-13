@@ -74,7 +74,7 @@ def check_task_status(task_id):
 
 def get_languages():
     """Return available languages for speech generation."""
-    languages = ['fr', 'gb', 'us']  # Example list
+    languages = ['es', 'fr', 'gb', 'us']  # Example list
     return jsonify({"languages": languages})
 
 def list_audio_files():

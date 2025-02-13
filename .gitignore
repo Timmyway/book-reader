@@ -41,3 +41,5 @@ Thumbs.db
 # Python cover
 
 /static/audio
+
+.env

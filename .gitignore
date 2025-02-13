@@ -39,3 +39,5 @@ Thumbs.db
 .ipynb_checkpoints
 
 # Python cover
+
+/static/audio

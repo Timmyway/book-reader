@@ -43,3 +43,4 @@ Thumbs.db
 app/static/audio/
 
 .env
+task_status.json

@@ -40,6 +40,6 @@ Thumbs.db
 
 # Python cover
 
-/static/audio
+app/static/audio/
 
 .env

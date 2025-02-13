@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text to Speech</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .form-container {
+            margin-bottom: 20px;
+        }
+
+        .loading {
+            color: #ff6600;
+        }
+
+        audio {
+            margin-top: 20px;
+        }
+
+        select {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Text to Speech Generator</h1>
+    <div class="form-container">
+        <form method="POST">
+            <label for="text">Enter text:</label><br>
+            <textarea id="text" name="text" rows="4" cols="50" required></textarea><br><br>
+            
+            <label for="language">Choose a language:</label><br>
+            <select id="language" name="language" onchange="loadModels()" required>
+                <option value="">Select a language</option>
+                {% for language in languages %}
+                    <option value="{{ language }}" {% if language == request.form['language'] %}selected{% endif %}>{{ language }}</option>
+                {% endfor %}
+            </select><br><br>            
+            
+            <label for="model">Choose a model:</label><br>
+            <select id="model" name="model" required disabled>
+                <option value="">Select a model</option>
+            </select><br><br>
+            
+            <button type="submit">Generate Speech</button>
+        </form>
+    </div>
+
+    {% if status %}
+        <p class="loading">{{ status }}</p>
+    {% endif %}
+
+    {% if audio_file %}
+        <h2>Generated Audio:</h2>
+        <audio controls>
+            <source src="{{ url_for('serve_audio', filename=audio_file.split('/')[-1]) }}" type="audio/wav">
+            Your browser does not support the audio element.
+        </audio>
+    {% endif %}
+
+    <script>
+        function loadModels() {
+            const language = document.getElementById('language').value;
+            const modelSelect = document.getElementById('model');
+            modelSelect.disabled = !language;  // Disable model select if no language is chosen
+
+            if (!language) {
+                modelSelect.innerHTML = '<option value="">Select a model</option>';
+                return;
+            }
+
+            // Fetch models for the selected language
+            fetch(`/models/${language}`)
+                .then(response => response.json())
+                .then(data => {
+                    const models = data.models;
+                    modelSelect.innerHTML = '<option value="">Select a model</option>';
+
+                    models.forEach(model => {
+                        const option = document.createElement('option');
+                        option.value = model;
+                        option.textContent = model.replace('.onnx', '');
+                        modelSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error loading models:', error));
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+# Python bytecode files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+env/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Flask specific
+instance/
+*.db
+
+# VSCode settings (if you're using it)
+.vscode/
+
+# PyCharm settings (if you're using it)
+.idea/
+
+# MacOS files
+.DS_Store
+
+# Windows files
+Thumbs.db
+
+# Logs and temporary files
+*.log
+*.swp
+*.swo
+*.bak
+*.tmp
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+
+# Python cover

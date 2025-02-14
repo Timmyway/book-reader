@@ -30,13 +30,23 @@
     </style>
 </head>
 
-<body x-data="speechApp()" x-init="initialize()">
-    <h1 class="fw-bold fs-5">Text to Speech Generator</h1>
+<body x-data="speechApp()" x-init="initialize()">    
     <div class="container mt-3">
+        <h1 class="fw-bold fs-5">Homemade TTS</h1>
         <div class="card p-4 shadow-sm">            
             <form @submit.prevent="generateSpeech">
                 <div class="mb-3">
-                    <label for="text" class="form-label" x-text="`Enter your text here (${text?.length}):`"></label>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <label for="text">Output filename</label>
+                        <button x-show="filename" type="button" class="btn btn-danger btn-sm" @click.prevent="clear('name')">Clear</button>
+                    </div>
+                    <input type="text" class="form-control" x-model="filename">
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <label for="text" x-text="`Enter your text here (${text?.length}):`"></label>
+                        <button x-show="text" type="button" class="btn btn-danger btn-sm" @click.prevent="clear('text')">Clear</button>
+                    </div>
                     <textarea
                         id="text" name="text"
                         rows="4"                        
@@ -121,6 +131,7 @@
                 stats: {
                     wordCount: 0
                 },
+                filename: '',
     
                 async initialize() {
                     await this.loadLanguages();
@@ -164,6 +175,7 @@
                     try {
                         const formData = new FormData(document.querySelector('form'))
                         formData.append('rate', this.rate);  // Append rate value
+                        formData.append('name', this.filename);
 
                         // Send the request to generate speech
                         const response = await fetch('/generate', {
@@ -218,6 +230,19 @@
                         .replace(/\.wav$/, '')       // Remove the file extension
                         .trim()                      // Remove any trailing spaces
                         .replace(/\b\w/g, char => char.toUpperCase()); // Capitalize first letter of each word
+                },
+
+                clear(what) {
+                    switch (what) {
+                        case 'name':
+                            this.filename = '';
+                            break;
+                        case 'text':
+                            this.text = '';
+                            break;
+                        default:
+                            console.warn(`Unknown field: ${field}`);
+                    }
                 }
             };
         }

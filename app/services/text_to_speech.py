@@ -2,6 +2,7 @@ import os
 import subprocess
 import re
 import unicodedata
+import time
 
 class TextToSpeech:
     def __init__(self, piper_path, models_dir, root_folder):
@@ -19,7 +20,7 @@ class TextToSpeech:
         language_path = os.path.join(self.models_dir, language)
         return [f for f in os.listdir(language_path) if f.endswith('.onnx')]
 
-    def get_safe_filename(self, text, n = 50):
+    def get_safe_filename(self, text, n = 40):
         """Generate a safe, slugified filename based on the input text."""
         # Normalize the text to remove accents
         normalized_text = unicodedata.normalize('NFKD', text[:n]).encode('ascii', 'ignore').decode('ascii')
@@ -29,8 +30,11 @@ class TextToSpeech:
         
         # Replace spaces with hyphens and convert to lowercase
         safe_text = re.sub(r'\s+', '-', slugified_text).lower()
+
+        # Add timestamp
+        timestamp = int(time.time())
         
-        return f"static/audio/{safe_text}.wav"
+        return f"static/audio/{safe_text}-{timestamp}.wav"
 
     def generate_speech(self, text, model_path, output_file, rate=1.0):
         """Run the Piper executable to generate speech from text."""
@@ -55,14 +59,17 @@ class TextToSpeech:
             print(f"Error in generate_speech: {e}")
             raise
 
-    def process_speech_request(self, text, selected_language, selected_model, rate=1.0):
+    def process_speech_request(self, text, selected_language, selected_model, rate = 1.0, name = None):
         """Process the text-to-speech request and return the output file path."""        
         model_path = os.path.join(self.models_dir, selected_language, selected_model)
         
         if not os.path.exists(model_path):
             raise FileNotFoundError(f"Model not found at {model_path}")        
         
-        output_file = self.get_safe_filename(text)        
+        if name is None:
+            output_file = self.get_safe_filename(text)
+        else:
+            output_file = self.get_safe_filename(name)
         self.generate_speech(text, model_path, output_file, rate)
         
         return output_file

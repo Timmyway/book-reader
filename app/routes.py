@@ -16,14 +16,14 @@ def serve_audio(filename):
     """Serve the audio file."""
     return send_from_directory('static/audio', filename)
 
-def background_generate_speech(text_to_speech, task_id, text, selected_language, selected_model, rate):
+def background_generate_speech(text_to_speech, task_id, text, selected_language, selected_model, rate, name):
     """Run speech generation in the background and update status."""
     
     # Manually push the app and request context for the background thread    
     save_task_status(task_id, "processing")    
     try:
         # Process the speech request and save output file path
-        output_file = text_to_speech.process_speech_request(text, selected_language, selected_model, rate)
+        output_file = text_to_speech.process_speech_request(text, selected_language, selected_model, rate, name)
         save_task_status(task_id, "completed")
     except Exception as e:
         save_task_status(task_id, f"failed: {str(e)}")
@@ -52,11 +52,12 @@ def generate_speech():
         selected_language = request.form.get("language")
         selected_model = request.form.get("model")  
         rate = float(request.form.get("rate", 1.0))  # Default rate is 1.0 if not provided      
+        name = request.form.get('name', None)
 
         task_id = str(uuid.uuid4())  # Generate a unique task ID
         with current_app.app_context():  # Pushing app context
             text_to_speech = current_app.config['TEXT_TO_SPEECH']
-            thread = threading.Thread(target=background_generate_speech, args=(text_to_speech, task_id, text, selected_language, selected_model, rate))
+            thread = threading.Thread(target=background_generate_speech, args=(text_to_speech, task_id, text, selected_language, selected_model, rate, name))
         thread.start()
 
         return jsonify({"task_id": task_id, "status": "Processing in the background..."})
@@ -74,7 +75,7 @@ def check_task_status(task_id):
 
 def get_languages():
     """Return available languages for speech generation."""
-    languages = ['es', 'fr', 'gb', 'us']  # Example list
+    languages = ['fr', 'gb', 'us', 'es']  # Example list
     return jsonify({"languages": languages})
 
 def list_audio_files():
@@ -95,8 +96,7 @@ def list_audio_files():
 
 
 def serve_audio(filename):
-    """Serve the audio file stored in the 'static/audio' directory."""
-    print('===========>', filename)
+    """Serve the audio file stored in the 'static/audio' directory."""    
     audio_dir = os.path.join(current_app.root_path, 'static', 'audio')
     try:
         return send_from_directory(audio_dir, filename)

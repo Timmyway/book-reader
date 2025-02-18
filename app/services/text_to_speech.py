@@ -2,7 +2,7 @@ import os
 import subprocess
 import re
 import unicodedata
-import time
+from datetime import datetime
 
 class TextToSpeech:
     def __init__(self, piper_path, models_dir, root_folder):
@@ -31,17 +31,17 @@ class TextToSpeech:
         # Replace spaces with hyphens and convert to lowercase
         safe_text = re.sub(r'\s+', '-', slugified_text).lower()
 
-        # Add timestamp
-        timestamp = int(time.time())
+        # Get the current datetime in a human-readable format
+        date_str = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         
-        return f"static/audio/{safe_text}-{timestamp}.wav"
+        return f"static/audio/{safe_text}-{date_str}.wav"
 
     def generate_speech(self, text, model_path, output_file, rate=1.0):
         """Run the Piper executable to generate speech from text."""
         
         output_file = os.path.join(self.root_folder, output_file)
         # Define the correct command for Piper
-        command = f'"{self.piper_path}" --model "{model_path}" --output_file "{output_file}" --rate {rate}'
+        command = f'"{self.piper_path}" --model "{model_path}" --output_file "{output_file}" --length_scale {rate}'
 
         print('-- 05 -> Command: ', command)
         
@@ -66,7 +66,7 @@ class TextToSpeech:
         if not os.path.exists(model_path):
             raise FileNotFoundError(f"Model not found at {model_path}")        
         
-        if name is None:
+        if name is None or name.strip() == '':
             output_file = self.get_safe_filename(text)
         else:
             output_file = self.get_safe_filename(name)

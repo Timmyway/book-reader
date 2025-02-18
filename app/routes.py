@@ -78,18 +78,32 @@ def get_languages():
     languages = ['fr', 'gb', 'us', 'es']  # Example list
     return jsonify({"languages": languages})
 
-def list_audio_files():
+def list_audio_files(order_by = 'desc'):
     """List all generated audio files in the 'static/audio' directory."""
-    audio_dir = os.path.join(current_app.root_path, 'static', 'audio')    
+    audio_dir = os.path.join(current_app.root_path, 'static', 'audio')
     
     try:
         # List all files in the audio directory
         audio_files = [
             file for file in os.listdir(audio_dir)
             if file.endswith(('.mp3', '.wav', '.ogg'))
-        ]  # Assuming the files are in .mp3 format
+        ]
+
+        # Convert to full paths and filter out missing files
+        audio_files_with_ctime = []
+        for file in audio_files:
+            file_path = os.path.join(audio_dir, file)
+            if os.path.exists(file_path):  # Ensure file exists before accessing metadata
+                audio_files_with_ctime.append((file, os.path.getmtime(file_path)))
+
+        # Sort by creation time (oldest first)
+        reverse = order_by == 'desc'  # True if 'desc', False if 'asc'
+        audio_files_with_ctime.sort(key=lambda x: x[1], reverse=reverse)
+
+        # Extract only filenames for response
+        sorted_files = [file[0] for file in audio_files_with_ctime]
         
-        return jsonify({"audio_files": audio_files})
+        return jsonify({"audio_files": sorted_files})
 
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
